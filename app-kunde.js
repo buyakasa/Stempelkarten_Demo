@@ -1,3 +1,4 @@
+(function setDynamicManifest() { try { const link = document.querySelector('link[rel="manifest"]'); if (!link) return; const manifest = { name: 'Stempelkarte', short_name: 'Stempel', start_url: location.href, scope: new URL('./', location.href).href, display: 'standalone', background_color: '#F5E6CC', theme_color: '#8B5A2B', icons: [ { src: new URL('icon-192.png', location.href).href, sizes: '192x192', type: 'image/png' }, { src: new URL('icon-512.png', location.href).href, sizes: '512x512', type: 'image/png' } ] }; link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' })); } catch (e) {} })();
 const C = window.STEMPEL_CONFIG;
 const $ = (id) => document.getElementById(id);
 
