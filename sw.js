@@ -1,4 +1,4 @@
-const CACHE = 'stempel-v1';
+const CACHE = 'stempel-v2';
 const SHELL = [
   'index.html',
   'mitarbeiter.html',
@@ -25,6 +25,6 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request))
+    caches.open(CACHE).then((c) => c.match(e.request, { ignoreSearch: true })).then((hit) => hit || fetch(e.request))
   );
 });
