@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Stempeln – Mitarbeiter</title>
+  <meta name="theme-color" content="#8B5A2B">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="personal">
+  <main>
+    <header>
+      <h1 id="shopM">Stempeln</h1>
+      <p>Personal-Ansicht</p>
+    </header>
+
+    <!-- Login -->
+    <section id="login" class="panel">
+      <label for="pin">Personal-PIN</label>
+      <input id="pin" type="password" inputmode="numeric" autocomplete="off">
+      <button id="loginBtn" class="big">Anmelden</button>
+      <p class="small">Hinweis: Nach 3 Fehlversuchen ist die Anmeldung für 10 Minuten gesperrt.</p>
+      <p id="loginMsg" class="msg"></p>
+    </section>
+
+    <!-- App -->
+    <section id="app" class="hidden">
+      <div class="panel">
+        <h2>Karte scannen</h2>
+        <video id="video" playsinline muted></video>
+        <canvas id="canvas" hidden></canvas>
+        <p class="small">oder Karten-Code eintippen:</p>
+        <div class="row">
+          <input id="manual" placeholder="Karten-ID" autocapitalize="characters">
+          <button id="useManual">Öffnen</button>
+        </div>
+      </div>
+
+      <div id="cardPanel" class="panel hidden">
+        <p id="cardInfo" class="info"></p>
+        <div id="stampsM" class="stamps"></div>
+        <button id="stampBtn" class="big">+1 Stempel</button>
+        <button id="redeemBtn" class="big secondary hidden">Prämie einlösen</button>
+        <button id="nextBtn" class="secondary">Nächster Kunde</button>
+        <p id="result" class="msg"></p>
+      </div>
+
+      <div class="panel">
+        <button id="newBtn" class="secondary">Neue Karte anlegen</button>
+        <div id="newPanel" class="hidden">
+          <p>Diesen Code dem Kunden zeigen:</p>
+          <div id="newQr" class="qrsmall"></div>
+          <p id="newLink" class="small"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="app-mitarbeiter.js"></script>
+</body>
+</html>

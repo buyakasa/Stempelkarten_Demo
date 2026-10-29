@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Stempelkarte</title>
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="theme-color" content="#8B5A2B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Stempelkarte">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="kunde">
+  <main>
+    <header>
+      <h1 id="shop">Stempelkarte</h1>
+      <p id="sub"></p>
+    </header>
+
+    <section id="card" class="card hidden">
+      <div id="stamps" class="stamps"></div>
+      <p id="count" class="count"></p>
+      <p id="reward" class="reward"></p>
+      <p id="cardno" class="small"></p>
+    </section>
+
+    <p id="msg" class="msg"></p>
+
+    <section id="idForm" class="panel hidden">
+      <label for="idInput">Kartennummer</label>
+      <div class="row">
+        <input id="idInput" placeholder="z. B. BD599B92" autocapitalize="characters" autocomplete="off">
+        <button id="idBtn">Öffnen</button>
+      </div>
+    </section>
+
+    <section id="qrBox" class="qrbox hidden">
+      <p>Beim Besuch diesen Code vorzeigen:</p>
+      <div id="qr"></div>
+    </section>
+
+    <section class="install">
+      <p><strong>Auf dem Handy speichern:</strong><br>
+      iPhone: Safari → Teilen → „Zum Home-Bildschirm“.<br>
+      Android: Chrome → Menü → „Zum Startbildschirm hinzufügen“.</p>
+    </section>
+
+    <button id="forget" class="secondary hidden">Andere Kartennummer verwenden</button>
+
+    <p id="demo" class="demo"></p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="app-kunde.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Muster-Bäcker – Frisches Brot aus Hannover (Demo)</title>
+  <meta name="description" content="Demo: Muster-Bäcker, fiktiver Musterbetrieb. Frisches Brot, Backwaren und Treuekarte.">
+  <meta name="theme-color" content="#A4561B">
+  <style>
+    :root {
+      --bg: #FFF9F2;
+      --surface: #FFFFFF;
+      --ink: #2A1A10;
+      --muted: #6B5444;
+      --brand: #A4561B;
+      --brand-ink: #FFFFFF;
+      --accent: #FFF4E3;
+      --radius: 18px;
+      --tap: 44px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1B120C; --surface: #271B13; --ink: #F7EDE3; --muted: #C7B3A3;
+        --brand: #E08A4B; --brand-ink: #1B120C; --accent: #33241A;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1B120C; --surface: #271B13; --ink: #F7EDE3; --muted: #C7B3A3;
+      --brand: #E08A4B; --brand-ink: #1B120C; --accent: #33241A;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--font); font-size: 17px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--brand); }
+    :focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; border-radius: 8px; }
+    .skip { position: absolute; left: -999px; }
+    .skip:focus { left: 16px; top: 16px; background: var(--surface); padding: 12px; z-index: 10; }
+
+    .demo-bar {
+      background: var(--accent); color: var(--ink); text-align: center;
+      font-size: 14px; padding: 8px 16px;
+    }
+    header.nav {
+      position: sticky; top: 0; z-index: 5;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+    }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 60px; gap: 12px; }
+    .brand { font-weight: 700; font-size: 20px; text-decoration: none; color: var(--ink); }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a {
+      min-height: var(--tap); display: inline-flex; align-items: center; padding: 0 12px;
+      color: var(--ink); text-decoration: none; border-radius: 10px;
+    }
+    .nav-links a:hover { background: var(--accent); }
+
+    .hero { padding: 56px 0 40px; }
+    .eyebrow { color: var(--brand); font-weight: 600; font-size: 15px; letter-spacing: .02em; margin: 0 0 8px; }
+    h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 16px; }
+    .lead { color: var(--muted); font-size: 1.15rem; max-width: 36ch; margin: 0 0 24px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      min-height: var(--tap); padding: 12px 20px; border-radius: 999px; font: inherit; font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: 0; cursor: pointer;
+      background: var(--brand); color: var(--brand-ink);
+    }
+    .btn.secondary { background: transparent; color: var(--brand); box-shadow: inset 0 0 0 2px var(--brand); }
+
+    section { padding: 40px 0; }
+    h2 { font-size: 1.7rem; letter-spacing: -.01em; margin: 0 0 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface); border-radius: var(--radius); padding: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.05);
+    }
+    .art {
+      height: 120px; border-radius: 14px; margin-bottom: 14px;
+      background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--brand) 35%, var(--accent)));
+      display: flex; align-items: center; justify-content: center; font-size: 46px;
+    }
+    .card h3 { margin: 0 0 6px; font-size: 1.15rem; }
+    .card p { margin: 0; color: var(--muted); }
+    .price { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+    .loyalty {
+      background: var(--brand); color: var(--brand-ink); border-radius: 24px; padding: 28px;
+      display: grid; gap: 14px;
+    }
+    .loyalty h2 { margin: 0; color: inherit; }
+    .loyalty p { margin: 0; opacity: .92; }
+    .loyalty .btn { background: var(--brand-ink); color: var(--brand); align-self: start; }
+    .dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 260px; }
+    .dots span {
+      aspect-ratio: 1; border-radius: 50%; border: 2px dashed currentColor; opacity: .7;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+    td, th { padding: 14px 18px; text-align: left; border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+    th { font-weight: 600; color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+
+    .contact { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .contact .card p + p { margin-top: 6px; }
+
+    footer { padding: 32px 0 48px; color: var(--muted); font-size: 15px; }
+    footer nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    footer nav a { min-height: var(--tap); display: inline-flex; align-items: center; padding: 0 10px; color: var(--muted); }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; animation: none !important; }
+    }
+    @media (max-width: 560px) {
+      .nav-links a { padding: 0 8px; }
+      .hero { padding-top: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#inhalt">Zum Inhalt springen</a>
+
+  <div class="demo-bar" role="note">Demo: Muster-Bäcker ist ein fiktiver Musterbetrieb. Alle Angaben sind Beispiele.</div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">Muster-Bäcker</a>
+      <nav class="nav-links" aria-label="Hauptnavigation">
+        <a href="#angebot">Angebot</a>
+        <a href="#treue">Treuekarte</a>
+        <a href="#zeiten">Öffnungszeiten</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inhalt">
+    <div id="top" class="wrap hero">
+      <p class="eyebrow">Seit 1987 · Handwerk aus Hannover</p>
+      <h1>Frisches Brot,<br>jeden Morgen.</h1>
+      <p class="lead">Sauerteig, Laugengebäck und Kuchen, ofenfrisch von 6 Uhr an. Bequem reservieren und abholen.</p>
+      <div class="actions">
+        <a class="btn" href="#zeiten">Öffnungszeiten</a>
+        <a class="btn secondary" href="#treue">Treuekarte holen</a>
+      </div>
+    </div>
+
+    <section id="angebot" class="wrap" aria-labelledby="angebot-h">
+      <h2 id="angebot-h">Unser Angebot</h2>
+      <div class="grid">
+        <article class="card">
+          <div class="art" aria-hidden="true">🥖</div>
+          <h3>Sauerteigbrot</h3>
+          <p>Langsam geführter Teig, 24 Stunden Reife.</p>
+          <p class="price">Beispielpreis: 4,20 €</p>
+        </article>
+        <article class="card">
+          <div class="art" aria-hidden="true">🥨</div>
+          <h3>Laugengebäck</h3>
+          <p>Brezeln und Stangen, morgens frisch aus dem Ofen.</p>
+          <p class="price">Beispielpreis: 1,80 €</p>
+        </article>
+        <article class="card">
+          <div class="art" aria-hidden="true">🍰</div>
+          <h3>Kuchen &amp; Torten</h3>
+          <p>Für Feiern auf Bestellung, auch mit Ihrem Wunschmotiv.</p>
+          <p class="price">Auf Anfrage</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="treue" class="wrap" aria-labelledby="treue-h">
+      <div class="loyalty">
+        <h2 id="treue-h">Treuekarte: 10 Brote kaufen, 1 Brot gratis</h2>
+        <p>Die Karte liegt digital auf Ihrem Handy. Einmal öffnen, auf den Home-Bildschirm legen und beim nächsten Besuch den Code zeigen.</p>
+        <div class="dots" aria-hidden="true">
+          <span>✓</span><span>✓</span><span>3</span><span>4</span><span>5</span>
+          <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+        </div>
+        <a class="btn" href="karte/">Treuekarte öffnen</a>
+      </div>
+    </section>
+
+    <section id="zeiten" class="wrap" aria-labelledby="zeiten-h">
+      <h2 id="zeiten-h">Öffnungszeiten</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">Montag – Freitag</th><td>6:00 – 18:00 Uhr</td></tr>
+          <tr><th scope="row">Samstag</th><td>6:30 – 13:00 Uhr</td></tr>
+          <tr><th scope="row">Sonntag</th><td>7:00 – 11:30 Uhr</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="kontakt" class="wrap" aria-labelledby="kontakt-h">
+      <h2 id="kontakt-h">Kontakt</h2>
+      <div class="contact">
+        <div class="card">
+          <p><strong>Adresse</strong></p>
+          <p>Musterstraße 1<br>30159 Hannover</p>
+        </div>
+        <div class="card">
+          <p><strong>Telefon</strong></p>
+          <p><a href="tel:+490000000000">0000 000000</a> (Beispiel)</p>
+        </div>
+        <div class="card">
+          <p><strong>E-Mail</strong></p>
+          <p><a href="mailto:info@example.com">info@example.com</a> (Beispiel)</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <nav aria-label="Rechtliches">
+      <a href="#impressum">Impressum</a>
+      <a href="#datenschutz">Datenschutz</a>
+    </nav>
+    <p id="impressum">Impressum: Musterangaben, bitte durch die echten Angaben des Betriebs ersetzen.</p>
+    <p id="datenschutz">Datenschutz: Musterhinweis. Vor einer Veröffentlichung durch eine vollständige Datenschutzerklärung ersetzen.</p>
+    <p>© Muster-Bäcker · Demo</p>
+  </footer>
+</body>
+</html>
