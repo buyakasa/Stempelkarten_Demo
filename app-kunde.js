@@ -47,7 +47,7 @@ function forgetCard() {
 }
 
 function start() {
-  $('msg').textContent = '';
+  $('msg').textContent = 'Karte wird geladen … bitte einen Moment warten.';
   load();
   if (timer) clearInterval(timer);
   timer = setInterval(load, 60000);

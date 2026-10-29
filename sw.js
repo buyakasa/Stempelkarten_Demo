@@ -1,4 +1,4 @@
-const CACHE = 'stempel-v5';
+const CACHE = 'stempel-v6';
 const SHELL = [
   'index.html',
   'mitarbeiter.html',
