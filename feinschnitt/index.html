@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Feinschnitt">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Salon Feinschnitt</title>
+<style>
+/* Layout: Apple-HIG-Webseite und Home-Bildschirm-App in einem – große Titel, eine Spalte mit 1020px Inhaltsbreite, Kacheln im Raster, gruppierte Listen, Tab-Leiste am Handy */
+:root {
+  --bg: #ffffff;
+  --bg-grouped: #f5f5f7;
+  --surface: #ffffff;
+  --label: #1d1d1f;
+  --label-2: #6e6e73;
+  --separator: rgba(60, 60, 67, .18);
+  --tint: #8c2f5f;          /* Pflaumenton, kontraststark auf Weiß */
+  --tint-fill: rgba(140, 47, 95, .1);
+  --on-tint: #ffffff;
+  --green: #248a3d;
+  --red: #c4271b;
+  --bar: rgba(255, 255, 255, .78);
+  --qr-bg: #ffffff;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --r-lg: 22px;
+  --r-md: 14px;
+  --tabbar-h: 0px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --bg-grouped: #0f0f10; --surface: #1c1c1e;
+    --label: #f5f5f7; --label-2: #a1a1a6; --separator: rgba(84, 84, 88, .55);
+    --tint: #f78fc0; --tint-fill: rgba(247, 143, 192, .16); --on-tint: #1d1d1f;
+    --green: #30d158; --red: #ff6961; --bar: rgba(22, 22, 23, .78);
+    --shadow: 0 0 0 1px rgba(255,255,255,.06);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --bg-grouped: #0f0f10; --surface: #1c1c1e;
+  --label: #f5f5f7; --label-2: #a1a1a6; --separator: rgba(84, 84, 88, .55);
+  --tint: #f78fc0; --tint-fill: rgba(247, 143, 192, .16); --on-tint: #1d1d1f;
+  --green: #30d158; --red: #ff6961; --bar: rgba(22, 22, 23, .78);
+  --shadow: 0 0 0 1px rgba(255,255,255,.06);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body {
+  background: var(--bg);
+  color: var(--label);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -.022em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  padding-bottom: var(--tabbar-h);
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bar);
+}
+img { display: block; max-width: 100%; }
+a { color: var(--tint); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; border-radius: 6px; }
+
+.wrap {
+  max-width: 1020px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+section { padding-block: 72px; }
+.grouped { background: var(--bg-grouped); }
+
+/* Typo-Skala nach HIG: Large Title / Title / Headline / Body / Footnote */
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+.eyebrow { font-size: 17px; font-weight: 600; color: var(--tint); margin: 0 0 6px; letter-spacing: -.01em; }
+.display { font-size: clamp(40px, 7vw, 72px); line-height: 1.05; font-weight: 700; letter-spacing: -.035em; }
+.title { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; font-weight: 700; letter-spacing: -.03em; }
+.lead { font-size: clamp(19px, 2.2vw, 24px); line-height: 1.35; color: var(--label-2); margin: 14px 0 0; max-width: 34ch; letter-spacing: -.02em; }
+.foot { font-size: 13px; color: var(--label-2); letter-spacing: -.005em; }
+.head-row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 32px; }
+
+/* Navigationsleiste mit Material-Unschärfe */
+.navbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: .5px solid var(--separator);
+}
+.navbar .wrap { display: flex; align-items: center; gap: 24px; height: 52px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--label); font-size: 17px; }
+.brand:hover { text-decoration: none; }
+.brand svg { width: 24px; height: 24px; color: var(--tint); }
+.navlinks { display: flex; gap: 22px; margin-left: auto; font-size: 13px; }
+.navlinks a { color: var(--label); opacity: .8; }
+.navlinks a:hover { opacity: 1; text-decoration: none; }
+.bag {
+  position: relative; display: grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--label); cursor: pointer;
+}
+.bag svg { width: 20px; height: 20px; }
+.bag .badge {
+  position: absolute; top: 2px; right: 0; min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 9px; background: var(--tint); color: var(--on-tint);
+  font: 600 11px/17px var(--font); letter-spacing: 0; font-variant-numeric: tabular-nums;
+}
+
+/* Tab-Leiste (nur Handybreite), wie in einer iOS-App */
+.tabbar {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  grid-template-columns: repeat(5, 1fr);
+  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-right: max(8px, env(safe-area-inset-right, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-top: .5px solid var(--separator);
+}
+.tabbar a {
+  display: grid; justify-items: center; gap: 2px; padding: 7px 0 6px;
+  color: var(--label-2); font-size: 10px; font-weight: 500; letter-spacing: .01em; text-decoration: none;
+}
+.tabbar a svg { width: 26px; height: 26px; }
+.tabbar a[aria-current="true"] { color: var(--tint); }
+@media (max-width: 720px) {
+  :root { --tabbar-h: calc(54px + env(safe-area-inset-bottom, 0px)); }
+  .navlinks { display: none; }
+  .bag { margin-left: auto; }
+  .tabbar { display: grid; }
+  section { padding-block: 56px; }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 22px; border-radius: 980px; border: 0;
+  font: 500 17px/1 var(--font); letter-spacing: -.02em; cursor: pointer;
+  background: var(--tint); color: var(--on-tint);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn:hover { filter: brightness(1.08); text-decoration: none; }
+.btn:active { transform: scale(.97); }
+.btn.plain { background: transparent; color: var(--tint); padding: 0 6px; }
+.btn.tinted { background: var(--tint-fill); color: var(--tint); }
+.btn.small { min-height: 36px; padding: 0 16px; font-size: 15px; }
+.btn[disabled] { opacity: .35; cursor: default; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* Hero */
+.hero { padding-block: 56px 72px; }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: 36px; }
+.hero-text { text-align: center; display: grid; justify-items: center; }
+.hero-text .lead { max-width: 30ch; }
+.hero-text .actions { justify-content: center; margin-top: 26px; }
+.hero-img { border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 16 / 9; max-width: 100%; }
+.hero-img img { width: 100%; height: 100%; object-fit: cover; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 7px; margin-bottom: 18px;
+  padding: 6px 12px; border-radius: 980px; background: var(--bg-grouped);
+  font-size: 14px; font-weight: 500; color: var(--label-2);
+}
+.status-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.status-pill.closed i { background: var(--label-2); }
+
+/* Kurzwahl auf die eigene Karte, sobald eine verbunden ist */
+.mini-card {
+  display: flex; align-items: center; gap: 14px; width: min(100%, 420px); margin-top: 22px;
+  padding: 12px 16px; border-radius: var(--r-md); background: var(--bg-grouped); color: var(--label); text-align: left;
+}
+.mini-card:hover { text-decoration: none; }
+.mini-card b { color: var(--tint); font-variant-numeric: tabular-nums; }
+.mini-card .chev { margin-left: auto; color: var(--label-2); font-size: 20px; }
+.mini-dots { display: flex; gap: 3px; }
+.mini-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--separator); }
+.mini-dots i.on { background: var(--tint); }
+
+/* Segmented Control */
+.segmented {
+  display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 2px; border-radius: 9px; background: rgba(118, 118, 128, .12); max-width: 100%;
+}
+.segmented button {
+  border: 0; background: transparent; color: var(--label);
+  font: 500 14px/1 var(--font); letter-spacing: -.01em;
+  padding: 8px 16px; border-radius: 7px; cursor: pointer; white-space: nowrap;
+}
+.segmented button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); font-weight: 600; }
+
+/* Kacheln */
+.product {
+  background: var(--surface); border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow); display: flex; flex-direction: column;
+  transition: transform .25s ease;
+}
+.product:hover { transform: translateY(-3px); }
+.product .ph { aspect-ratio: 4 / 3; overflow: hidden; background: var(--bg-grouped); }
+.product .ph img { width: 100%; height: 100%; object-fit: cover; }
+.product .body { padding: 18px 20px 20px; display: grid; gap: 6px; flex: 1; min-width: 0; }
+.product .tag { font-size: 12px; font-weight: 600; color: var(--tint); text-transform: uppercase; letter-spacing: .06em; }
+.product h3 { font-size: 21px; font-weight: 600; letter-spacing: -.02em; }
+.product p { margin: 0; color: var(--label-2); font-size: 15px; line-height: 1.4; }
+.product .meta { margin-top: auto; padding-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.price { font-weight: 600; font-variant-numeric: tabular-nums; }
+.price small { font-weight: 400; color: var(--label-2); font-size: 13px; margin-left: 4px; }
+.add {
+  width: 36px; height: 36px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--tint-fill); color: var(--tint); display: grid; place-items: center;
+  transition: transform .15s ease;
+}
+.add:active { transform: scale(.9); }
+.add svg { width: 18px; height: 18px; }
+.add.done { background: var(--tint); color: var(--on-tint); }
+
+/* Ablauf eines Termins */
+.night { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); margin-top: 40px; }
+.step { padding: 22px 22px 22px 0; border-top: 1px solid var(--separator); display: grid; gap: 6px; align-content: start; }
+.step time { font-family: var(--font-round); font-size: 34px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--tint); }
+.step h3 { font-size: 17px; font-weight: 600; }
+.step p { margin: 0; font-size: 15px; color: var(--label-2); }
+
+/* Stempelkarte */
+.loyalty { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 40px; align-items: center; }
+.loyalty-text { display: grid; gap: 22px; min-width: 0; }
+.loyalty-text .lead { margin: 0; }
+.card-ui {
+  background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow);
+  padding: 24px; display: grid; gap: 18px; max-width: 420px; width: 100%; justify-self: center;
+}
+.card-ui header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.card-ui header strong { font-size: 17px; }
+.chip {
+  font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 980px;
+  background: var(--bg-grouped); color: var(--label-2); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chip.live { background: var(--tint-fill); color: var(--tint); }
+.stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.stamp {
+  aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed var(--separator);
+  display: grid; place-items: center; font: 600 15px var(--font-round); color: var(--label-2);
+  font-variant-numeric: tabular-nums; transition: background .3s ease, transform .3s ease;
+}
+.stamp.on { border: 0; background: var(--tint); color: var(--on-tint); }
+.stamp.pop { transform: scale(1.12); }
+.stamp svg { width: 50%; height: 50%; }
+.progress { height: 6px; border-radius: 3px; background: rgba(118,118,128,.16); overflow: hidden; }
+.progress span { display: block; height: 100%; width: 0; background: var(--tint); border-radius: 3px; transition: width .4s ease; }
+.card-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.card-count strong { font-variant-numeric: tabular-nums; }
+.reward-due { color: var(--tint); font-weight: 600; }
+.qr { display: grid; justify-items: center; gap: 8px; padding-top: 18px; border-top: .5px solid var(--separator); }
+.qr-box { background: var(--qr-bg); padding: 10px; border-radius: var(--r-md); line-height: 0; }
+.qr-box svg { width: 196px; height: 196px; max-width: 100%; }
+.code { font: 600 15px var(--font-round); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+.msg { margin: 0; min-height: 0; color: var(--red); font-size: 15px; }
+.connect { display: flex; gap: 8px; }
+.connect input {
+  flex: 1; min-width: 0; font: 17px var(--font); color: var(--label); background: var(--bg-grouped);
+  border: 0; border-radius: 10px; padding: 10px 14px; min-height: 44px; text-transform: uppercase; letter-spacing: .08em;
+}
+.connect input::placeholder { text-transform: none; letter-spacing: -.01em; }
+
+/* App auf den Home-Bildschirm */
+.install { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 32px; align-items: center; }
+.app-icon { width: 96px; height: 96px; border-radius: 22px; box-shadow: var(--shadow); }
+.install-head { display: grid; gap: 18px; justify-items: start; min-width: 0; }
+.install-head .lead { margin: 0; }
+.how { display: grid; gap: 16px; min-width: 0; }
+.row .ico { display: inline-grid; place-items: center; width: 29px; height: 29px; border-radius: 7px; background: var(--tint); color: var(--on-tint); flex: none; }
+.row .ico svg { width: 17px; height: 17px; }
+.row .txt { flex: 1; min-width: 0; }
+.row .txt small { display: block; color: var(--label-2); font-size: 13px; }
+.installed-note { display: none; }
+.is-app .install-steps { display: none; }
+.is-app .installed-note { display: block; }
+
+/* Gruppierte Liste (Inset Grouped) */
+.list { background: var(--surface); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 44px; padding: 11px 16px; position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: .5px solid var(--separator); }
+.row .v { color: var(--label-2); font-variant-numeric: tabular-nums; text-align: right; }
+.row.today { font-weight: 600; }
+.row.today .v { color: var(--tint); }
+.list-title { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--label-2); margin: 0 0 8px 16px; }
+
+.visit { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 32px; align-items: start; }
+.visit-img { border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; max-width: 100%; }
+.visit-img img { width: 100%; height: 100%; object-fit: cover; }
+.visit-info { display: grid; gap: 24px; min-width: 0; }
+
+/* Terminanfrage */
+.order { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 32px; align-items: start; margin-top: 40px; }
+.stepper { display: inline-flex; align-items: center; border-radius: 9px; background: rgba(118,118,128,.12); }
+.stepper button { width: 38px; height: 32px; border: 0; background: transparent; color: var(--label); font: 500 19px/1 var(--font); cursor: pointer; border-radius: 9px; }
+.stepper span { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 600; }
+.item-name { min-width: 0; }
+.item-name small { display: block; color: var(--label-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+.empty { padding: 28px 16px; text-align: center; color: var(--label-2); }
+.total { font-weight: 600; font-size: 19px; font-variant-numeric: tabular-nums; }
+.slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.slots button {
+  border: 1px solid var(--separator); background: var(--surface); color: var(--label);
+  font: 500 15px var(--font); padding: 9px 14px; border-radius: 980px; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.slots button[aria-pressed="true"] { background: var(--tint); border-color: var(--tint); color: var(--on-tint); }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; color: var(--label-2); margin-left: 16px; text-transform: uppercase; letter-spacing: .04em; }
+.field input {
+  font: 17px var(--font); color: var(--label); background: var(--surface);
+  border: 0; border-radius: var(--r-md); padding: 12px 16px; min-height: 44px; box-shadow: var(--shadow);
+}
+.order-side { display: grid; gap: 22px; min-width: 0; }
+.confirm { border-radius: var(--r-md); padding: 18px; background: var(--tint-fill); display: grid; gap: 4px; }
+.confirm strong { color: var(--tint); }
+
+footer { padding-block: 36px 48px; border-top: .5px solid var(--separator); }
+footer .wrap { display: grid; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+/* Hero-Grafik statt Foto: eigene Zeichnung, keine Bildrechte nötig */
+.hero-art {
+  position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 16 / 9; max-width: 100%; color: #fff;
+  background:
+    radial-gradient(110% 90% at 12% 8%, #c45b90 0%, transparent 62%),
+    radial-gradient(90% 80% at 92% 95%, #3d0f28 0%, transparent 70%),
+    #7a2852;
+}
+.art-scissors { position: absolute; left: 8%; top: 9%; width: 84%; height: 78%; }
+.art-chip {
+  position: absolute; padding: 8px 14px; border-radius: 980px; background: var(--surface); color: var(--label);
+  font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,.18); white-space: nowrap;
+}
+.art-chip b { color: var(--tint); }
+.art-chip-1 { left: 5%; top: 8%; }
+.art-chip-2 { right: 5%; bottom: 8%; }
+@media (max-width: 720px) {
+  .hero-art { aspect-ratio: 4 / 3; }
+  .art-chip { font-size: 12px; padding: 6px 11px; }
+}
+
+/* Leistungen als Preiskarten */
+.services { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 20px; }
+.service .body { padding: 22px 22px 20px; }
+.price small.from { margin: 0 4px 0 0; }
+.remove {
+  width: 30px; height: 30px; border-radius: 50%; border: 0; cursor: pointer; flex: none;
+  background: rgba(118,118,128,.12); color: var(--label-2); font: 400 19px/1 var(--font);
+}
+.total small { font-weight: 400; }
+
+</style>
+</head>
+<body>
+
+<nav class="navbar" aria-label="Hauptnavigation">
+  <div class="wrap">
+    <a class="brand" href="#start">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="17.5" r="3"/><circle cx="17.5" cy="17.5" r="3"/><path d="M8.6 15.4 19 3.5"/><path d="M15.4 15.4 5 3.5"/></svg>
+      Feinschnitt
+    </a>
+    <div class="navlinks">
+      <a href="#stempelkarte">Stempelkarte</a>
+      <a href="#leistungen">Preise</a>
+      <a href="#termin">Termin</a>
+      <a href="#besuch">Besuch</a>
+      <a href="#app">App</a>
+    </div>
+    <button class="bag" id="bagBtn" type="button" aria-label="Zur Terminanfrage">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>
+      <span class="badge" id="badge" hidden>0</span>
+    </button>
+  </div>
+</nav>
+
+<main>
+  <section class="hero" id="start">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <span class="status-pill" id="status"><i></i><span id="statusText">Heute geöffnet</span></span>
+        <h1 class="display">Ihr Haar in besten Händen.</h1>
+        <p class="lead">Schnitt, Farbe und Pflege mit Zeit für Beratung. Ohne Hektik, ohne Fließband.</p>
+        <div class="actions">
+          <a class="btn" href="#termin">Termin anfragen</a>
+          <a class="btn plain" href="#leistungen">Preise ansehen ›</a>
+        </div>
+        <a class="mini-card" id="miniCard" href="#stempelkarte" hidden>
+          <span class="mini-dots" id="miniDots"></span>
+          <span>Meine Karte: <b id="miniCount">0 von 10</b></span>
+          <span class="chev" aria-hidden="true">›</span>
+        </a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg class="art-scissors" viewBox="0 0 240 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 118c34-30 62-8 92-36s46-62 120-58" stroke-width="2" opacity=".35"/>
+          <path d="M18 136c40-22 70 2 104-24s52-52 106-48" stroke-width="2" opacity=".22"/>
+          <circle cx="92" cy="116" r="17" stroke-width="5"/>
+          <circle cx="148" cy="116" r="17" stroke-width="5"/>
+          <path d="M104 103 162 28" stroke-width="6"/>
+          <path d="M136 103 78 28" stroke-width="6"/>
+          <circle cx="120" cy="82" r="3.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="art-chip art-chip-1"><b>Neu:</b> Termine auch samstags</div>
+        <div class="art-chip art-chip-2">Jeder 10. Besuch: Pflege-Kur gratis</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grouped" id="stempelkarte">
+    <div class="wrap loyalty">
+      <div class="loyalty-text">
+        <div>
+          <p class="eyebrow">Digitale Stempelkarte</p>
+          <h2 class="title">Zehn Besuche. Eine Pflege-Kur geschenkt.</h2>
+        </div>
+        <p class="lead" id="cardLead">Am Empfang zeigen wir Ihnen einen QR-Code. Einmal scannen, dann liegt Ihre Karte hier in der App.</p>
+        <div id="connectBox" class="field" hidden>
+          <label for="cardCodeInput">Karten-Code eingeben</label>
+          <form class="connect" id="connectForm" novalidate>
+            <input id="cardCodeInput" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="z. B. 7F3K9Q2M" maxlength="12">
+            <button class="btn small" type="submit">Verbinden</button>
+          </form>
+        </div>
+        <div class="actions" id="cardActions"></div>
+        <p class="msg" id="cardMsg" role="status"></p>
+      </div>
+      <div class="card-ui" id="cardUi">
+        <header><strong id="cardName">Feinschnitt Treuekarte</strong><span class="chip" id="cardChip">Beispiel</span></header>
+        <div class="stamps" id="stamps"></div>
+        <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+        <div class="card-count">
+          <strong id="cardCount">7 von 10 Stempeln</strong>
+          <span class="foot" style="font-size:15px" id="cardReward">Noch 3 bis zur Pflege-Kur</span>
+        </div>
+        <div class="qr" id="qrWrap" hidden>
+          <span class="foot">Am Empfang vorzeigen</span>
+          <div class="qr-box" id="qr"></div>
+          <span class="code" id="cardCode"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="leistungen">
+    <div class="wrap">
+      <div class="head-row">
+        <div>
+          <p class="eyebrow">Leistungen und Preise</p>
+          <h2 class="title">Was dürfen wir für Sie tun?</h2>
+        </div>
+        <div class="segmented" role="group" aria-label="Kategorie filtern" id="filter">
+          <button type="button" aria-pressed="true" data-cat="alle">Alle</button>
+          <button type="button" aria-pressed="false" data-cat="damen">Damen</button>
+          <button type="button" aria-pressed="false" data-cat="herren">Herren</button>
+          <button type="button" aria-pressed="false" data-cat="kinder">Kinder</button>
+          <button type="button" aria-pressed="false" data-cat="farbe">Farbe</button>
+        </div>
+      </div>
+      <div class="services" id="services"></div>
+      <p class="foot" style="margin:20px 0 0">„ab“-Preise gelten für kurzes Haar. Bei langem oder sehr dichtem Haar sagen wir Ihnen den Preis vorher.</p>
+    </div>
+  </section>
+
+  <section class="grouped" id="termin">
+    <div class="wrap">
+      <p class="eyebrow">Termin anfragen</p>
+      <h2 class="title">Wunschzeit wählen, wir rufen zurück.</h2>
+      <p class="lead">Leistungen oben mit + auswählen, dann Tag und Uhrzeit. Wir bestätigen telefonisch.</p>
+      <div class="order">
+        <div>
+          <p class="list-title">Ihre Auswahl</p>
+          <div class="list" id="cart"></div>
+        </div>
+        <form class="order-side" id="orderForm" novalidate>
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" autocomplete="name" placeholder="z. B. Alex Muster" required>
+          </div>
+          <div class="field">
+            <label for="phone">Telefon für die Bestätigung</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="z. B. 0151 234 567">
+          </div>
+          <div class="field">
+            <label id="dayLabel">Tag</label>
+            <div class="slots" role="group" aria-labelledby="dayLabel" id="days"></div>
+          </div>
+          <div class="field">
+            <label id="slotLabel">Uhrzeit</label>
+            <div class="slots" role="group" aria-labelledby="slotLabel" id="slots"></div>
+          </div>
+          <div class="field">
+            <label id="stylistLabel">Bei wem?</label>
+            <div class="slots" role="group" aria-labelledby="stylistLabel" id="stylists">
+              <button type="button" aria-pressed="true">Egal</button>
+              <button type="button" aria-pressed="false">Lena</button>
+              <button type="button" aria-pressed="false">Murat</button>
+              <button type="button" aria-pressed="false">Sofia</button>
+            </div>
+          </div>
+          <div class="row" style="padding:0 4px">
+            <span class="total">Summe <small class="foot" id="duration"></small></span>
+            <span class="total" id="total">0 €</span>
+          </div>
+          <button class="btn" id="submitBtn" type="submit" disabled>Termin anfragen</button>
+          <div class="confirm" id="confirm" hidden role="status"></div>
+          <p class="foot" style="margin:0">Musterseite: Die Anfrage wird nicht übermittelt. Bezahlt wird nach dem Termin.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="besuch">
+    <div class="wrap">
+      <p class="eyebrow">Besuch</p>
+      <h2 class="title" style="margin-bottom:40px">Wir freuen uns auf Sie.</h2>
+      <div class="visit">
+        <div>
+          <p class="list-title">Öffnungszeiten</p>
+          <div class="list" id="hours"></div>
+        </div>
+        <div class="visit-info">
+          <div>
+            <p class="list-title">Kontakt</p>
+            <div class="list">
+              <div class="row"><span>Adresse</span><span class="v">Musterallee 7<br>12345 Musterstadt</span></div>
+              <div class="row"><span>Telefon</span><span class="v" style="user-select:all">0123 987 654</span></div>
+              <div class="row"><span>E-Mail</span><span class="v" style="user-select:all">hallo@feinschnitt.example</span></div>
+            </div>
+          </div>
+          <div>
+            <p class="list-title">Gut zu wissen</p>
+            <div class="list">
+              <div class="row"><span>Parken</span><span class="v">2 Plätze direkt vor dem Salon</span></div>
+              <div class="row"><span>Bezahlen</span><span class="v">Bar, EC-Karte, Apple Pay</span></div>
+              <div class="row"><span>Absagen</span><span class="v">Bitte bis 24 Stunden vorher</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grouped" id="ablauf">
+    <div class="wrap">
+      <p class="eyebrow">Ihr Termin</p>
+      <h2 class="title">So läuft ein Besuch bei uns.</h2>
+      <p class="lead">Am Beispiel Waschen, Schneiden, Föhnen. Gut eine Stunde nur für Sie.</p>
+      <div class="night">
+        <div class="step"><time>5 Min</time><h3>Beratung</h3><p>Was soll bleiben, was darf weg? Wir schauen gemeinsam, was zu Ihrem Haar passt.</p></div>
+        <div class="step"><time>10 Min</time><h3>Waschen</h3><p>Mit Kopfmassage und einem Shampoo, das zu Ihrer Kopfhaut passt.</p></div>
+        <div class="step"><time>30 Min</time><h3>Schnitt</h3><p>Nass vorgeschnitten, trocken nachgearbeitet. So fällt der Schnitt auch zu Hause.</p></div>
+        <div class="step"><time>15 Min</time><h3>Föhnen</h3><p>Styling nach Wunsch, auf Wunsch mit Tipps zum Nachmachen.</p></div>
+        <div class="step"><time>2 Min</time><h3>Stempel</h3><p>QR-Code am Empfang zeigen, Stempel landet sofort in Ihrer App.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="app">
+    <div class="wrap install">
+      <div class="install-head">
+        <img class="app-icon" src="icon-180.png" alt="" width="96" height="96">
+        <div>
+          <p class="eyebrow">Feinschnitt als App</p>
+          <h2 class="title">Alles auf Ihrem Home-Bildschirm.</h2>
+        </div>
+        <p class="lead">Stempelkarte, Terminanfrage, Preise und Öffnungszeiten mit einem Tipp. Ohne App Store, ohne Anmeldung.</p>
+        <button class="btn" id="installBtn" type="button" hidden>App installieren</button>
+      </div>
+      <div class="how">
+        <div class="install-steps">
+          <p class="list-title">iPhone und iPad (Safari)</p>
+          <div class="list">
+            <div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M6 11v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8"/></svg></span><span class="txt">Unten auf <b>Teilen</b> tippen</span></div>
+            <div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span class="txt"><b>Zum Home-Bildschirm</b> wählen<small>Eventuell erst nach unten scrollen</small></span></div>
+            <div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><span class="txt">Oben rechts <b>Hinzufügen</b></span></div>
+          </div>
+        </div>
+        <div class="install-steps">
+          <p class="list-title">Android (Chrome)</p>
+          <div class="list">
+            <div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></span><span class="txt">Oben rechts das <b>Menü</b> öffnen</span></div>
+            <div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span class="txt"><b>App installieren</b> oder <b>Zum Startbildschirm hinzufügen</b></span></div>
+          </div>
+        </div>
+        <div class="installed-note list"><div class="row"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><span class="txt"><b>Installiert.</b> Sie nutzen Feinschnitt bereits als App.<small>Neue Angebote und freie Termine erscheinen automatisch, sobald Sie online sind.</small></span></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot" style="margin:0"><strong>Salon Feinschnitt</strong> ist ein fiktiver Musterbetrieb. Alle Namen, Preise, Bewertungen und Adressen sind Beispiele.</p>
+    <p class="foot" style="margin:0">Stempelkarte speichert nur eine zufällige Karten-ID und die Anzahl der Stempel, keine Namen. Impressum und Datenschutz folgen beim echten Betrieb.</p>
+  </div>
+</footer>
+
+<nav class="tabbar" id="tabbar" aria-label="App-Navigation">
+  <a href="#start" data-tab="start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1Z"/></svg>Start</a>
+  <a href="#stempelkarte" data-tab="stempelkarte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="8" cy="10" r="1.4" fill="currentColor"/><circle cx="12" cy="10" r="1.4" fill="currentColor"/><circle cx="16" cy="10" r="1.4"/><path d="M7 15h6"/></svg>Karte</a>
+  <a href="#leistungen" data-tab="leistungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="17.5" r="3"/><circle cx="17.5" cy="17.5" r="3"/><path d="M8.6 15.4 19 3.5"/><path d="M15.4 15.4 5 3.5"/></svg>Preise</a>
+  <a href="#termin" data-tab="termin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>Termin</a>
+  <a href="#besuch" data-tab="besuch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>Besuch</a>
+</nav>
+
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const SERVICES = [
+  { id: 'damen-wsf', cat: 'damen', name: 'Waschen, Schneiden, Föhnen', tag: 'Damen', desc: 'Beratung, Haarwäsche mit Kopfmassage, Schnitt und Föhnfrisur.', min: 60, price: 49, from: true },
+  { id: 'damen-foehn', cat: 'damen', name: 'Waschen und Föhnen', tag: 'Damen', desc: 'Glatt, mit Volumen oder Wellen. Ohne Schnitt.', min: 30, price: 29, from: true },
+  { id: 'damen-hochsteck', cat: 'damen', name: 'Hochsteckfrisur', tag: 'Anlass', desc: 'Für Hochzeit, Abiball oder Feier. Mit Probetermin auf Wunsch.', min: 60, price: 65, from: true },
+  { id: 'herren-schnitt', cat: 'herren', name: 'Herrenschnitt', tag: 'Herren', desc: 'Waschen, Schere und Maschine, Styling mit Produkt.', min: 30, price: 29 },
+  { id: 'herren-maschine', cat: 'herren', name: 'Maschinenschnitt', tag: 'Herren', desc: 'Kurz und schnell, eine oder zwei Längen, Konturen sauber.', min: 20, price: 19 },
+  { id: 'herren-bart', cat: 'herren', name: 'Bart in Form', tag: 'Bart', desc: 'Konturen, Länge und Pflegeöl. Gern zusammen mit dem Schnitt.', min: 20, price: 15 },
+  { id: 'kinder', cat: 'kinder', name: 'Kinderschnitt', tag: 'Bis 12 Jahre', desc: 'Mit Geduld und ohne Tränen. Gummibärchen inklusive.', min: 20, price: 17 },
+  { id: 'farbe-ansatz', cat: 'farbe', name: 'Ansatzfarbe', tag: 'Farbe', desc: 'Grauabdeckung oder Auffrischen der eigenen Farbe am Ansatz.', min: 75, price: 55, from: true },
+  { id: 'farbe-balayage', cat: 'farbe', name: 'Balayage', tag: 'Farbe', desc: 'Frei gemalte Strähnen für weiche Übergänge, inklusive Glossing.', min: 150, price: 129, from: true },
+  { id: 'pflege-kur', cat: 'farbe', name: 'Pflege-Kur', tag: 'Pflege', desc: 'Intensivpflege mit Wärme für trockenes oder gefärbtes Haar.', min: 15, price: 12 },
+];
+const HOURS = [ // Montag = 0, null = geschlossen
+  ['Montag', null, null], ['Dienstag', '09:00', '19:00'], ['Mittwoch', '09:00', '19:00'],
+  ['Donnerstag', '09:00', '20:00'], ['Freitag', '09:00', '19:00'], ['Samstag', '08:00', '14:00'], ['Sonntag', null, null],
+];
+
+const $ = (id) => document.getElementById(id);
+const eur = (n) => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
+const plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+const toM = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const dauer = (m) => (m < 60 ? `${m} Min` : `${Math.floor(m / 60)} Std${m % 60 ? ` ${m % 60} Min` : ''}`);
+
+// localStorage kann gesperrt sein (privates Fenster) – dann läuft alles ohne Speichern
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+// ---------- Leistungen & Terminanfrage ----------
+let picked = ['damen-wsf'];
+try { const saved = JSON.parse(store.get('feinschnitt-termin')); if (Array.isArray(saved)) picked = saved; } catch (e) {}
+
+function renderServices(cat) {
+  $('services').innerHTML = SERVICES.filter((s) => cat === 'alle' || s.cat === cat).map((s) => {
+    const on = picked.includes(s.id);
+    return `
+    <article class="product service">
+      <div class="body">
+        <span class="tag">${s.tag}</span>
+        <h3>${s.name}</h3>
+        <p>${s.desc}</p>
+        <div class="meta">
+          <span class="price">${s.from ? '<small class="from">ab</small>' : ''}${eur(s.price)}<small>${dauer(s.min)}</small></span>
+          <button class="add${on ? ' done' : ''}" type="button" data-id="${s.id}" aria-pressed="${on}" aria-label="${s.name} ${on ? 'aus der Auswahl entfernen' : 'auswählen'}">${on ? check : plus}</button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function renderCart() {
+  picked = picked.filter((id) => SERVICES.some((s) => s.id === id));
+  const list = picked.map((id) => SERVICES.find((s) => s.id === id));
+  const total = list.reduce((n, s) => n + s.price, 0);
+  const mins = list.reduce((n, s) => n + s.min, 0);
+  $('cart').innerHTML = list.length ? list.map((s) => `<div class="row">
+      <span class="item-name">${s.name}<small>${s.from ? 'ab ' : ''}${eur(s.price)} · ${dauer(s.min)}</small></span>
+      <button class="remove" type="button" data-id="${s.id}" aria-label="${s.name} entfernen">×</button>
+    </div>`).join('') : '<div class="empty">Noch nichts ausgewählt. Tippen Sie bei den Leistungen auf +.</div>';
+  $('total').textContent = (list.some((s) => s.from) ? 'ab ' : '') + eur(total);
+  $('duration').textContent = mins ? `· ca. ${dauer(mins)}` : '';
+  $('badge').textContent = list.length;
+  $('badge').hidden = list.length === 0;
+  $('submitBtn').disabled = list.length === 0;
+  store.set('feinschnitt-termin', JSON.stringify(picked));
+}
+
+const activeCat = () => $('filter').querySelector('[aria-pressed="true"]').dataset.cat;
+
+$('filter').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  $('filter').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  renderServices(b.dataset.cat);
+});
+
+function toggle(id) {
+  picked = picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id];
+  renderCart();
+  renderServices(activeCat());
+}
+$('services').addEventListener('click', (e) => { const b = e.target.closest('.add'); if (b) toggle(b.dataset.id); });
+$('cart').addEventListener('click', (e) => { const b = e.target.closest('.remove'); if (b) toggle(b.dataset.id); });
+
+// Nur Tage, an denen geöffnet ist; Uhrzeiten alle 90 Minuten bis eine Stunde vor Schluss
+const WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const openDays = (() => {
+  const out = [];
+  const d = new Date();
+  while (out.length < 6) {
+    d.setDate(d.getDate() + 1);
+    const i = (d.getDay() + 6) % 7;
+    if (HOURS[i][1]) out.push({ i, label: `${WD[i]} ${d.getDate()}.${d.getMonth() + 1}.` });
+  }
+  return out;
+})();
+
+function pickOne(group, b) {
+  group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+}
+function renderSlots(dayIdx) {
+  const [, a, b] = HOURS[dayIdx];
+  const times = [];
+  for (let m = toM(a); m <= toM(b) - 60; m += 90) times.push(hhmm(m));
+  $('slots').innerHTML = times.map((t, i) => `<button type="button" aria-pressed="${i === 1}">${t}</button>`).join('');
+}
+$('days').innerHTML = openDays.map((d, n) => `<button type="button" aria-pressed="${n === 0}" data-i="${d.i}">${d.label}</button>`).join('');
+renderSlots(openDays[0].i);
+
+$('days').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  pickOne($('days'), b);
+  renderSlots(Number(b.dataset.i));
+});
+['slots', 'stylists'].forEach((id) => $(id).addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b) pickOne($(id), b);
+}));
+
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+$('orderForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('name').value.trim();
+  const box = $('confirm');
+  box.hidden = false;
+  if (!name) {
+    box.innerHTML = '<strong>Name fehlt</strong><span>Bitte tragen Sie einen Namen ein, damit wir Ihre Anfrage zuordnen können.</span>';
+    $('name').focus();
+    return;
+  }
+  const sel = (id) => $(id).querySelector('[aria-pressed="true"]').textContent;
+  const who = sel('stylists');
+  box.innerHTML = `<strong>Anfrage vorgemerkt für ${esc(name)}</strong><span>${sel('days')} um ${sel('slots')} Uhr${who === 'Egal' ? '' : ` bei ${who}`}, ${$('total').textContent}. Wir rufen zur Bestätigung an. (Musterseite: nichts wurde gesendet.)</span>`;
+});
+
+$('bagBtn').addEventListener('click', () => $('termin').scrollIntoView());
+
+// ---------- Öffnungszeiten ----------
+(function hours() {
+  const now = new Date();
+  const todayIdx = (now.getDay() + 6) % 7;
+  $('hours').innerHTML = HOURS.map(([d, a, b], i) =>
+    `<div class="row${i === todayIdx ? ' today' : ''}"><span>${d}${i === todayIdx ? ' · heute' : ''}</span><span class="v">${a ? `${a} – ${b} Uhr` : 'geschlossen'}</span></div>`).join('');
+  const [, a, b] = HOURS[todayIdx];
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const open = a && mins >= toM(a) && mins < toM(b);
+  let text;
+  if (open) text = `Jetzt geöffnet · bis ${b} Uhr`;
+  else if (a && mins < toM(a)) text = `Geschlossen · heute ab ${a} Uhr`;
+  else {
+    let n = 1;
+    while (!HOURS[(todayIdx + n) % 7][1]) n++;
+    const [day, from] = HOURS[(todayIdx + n) % 7];
+    text = `Geschlossen · ${n === 1 ? 'morgen' : day} ab ${from} Uhr`;
+  }
+  $('statusText').textContent = text;
+  $('status').classList.toggle('closed', !open);
+})();
+
+// ---------- Stempelkarte (gleiches Backend wie mitarbeiter.html) ----------
+const C = Object.assign(
+  { name: 'Salon Feinschnitt', stampsTotal: 10, reward: '1 Pflege-Kur', apiUrl: '' },
+  window.STEMPEL_CONFIG || {}
+);
+// Solange keine Apps-Script-URL eingetragen ist, läuft die Karte als Demo nur auf diesem Gerät
+const DEMO = !C.apiUrl || C.apiUrl.includes('DEINE_SCRIPT_ID');
+const TOTAL = C.stampsTotal;
+
+let cardId = new URLSearchParams(location.search).get('id');
+if (cardId) store.set('feinschnitt-stempel-id', cardId);
+else cardId = store.get('feinschnitt-stempel-id');
+let qrFor = null;
+let lastStamps = null;
+
+// Karten-ID in der Adresse behalten: „Zum Home-Bildschirm“ übernimmt dann die eigene Karte
+function keepIdInUrl() {
+  if (!cardId || new URLSearchParams(location.search).get('id') === cardId) return;
+  try { history.replaceState(null, '', `${location.pathname}?id=${encodeURIComponent(cardId)}${location.hash}`); } catch (e) {}
+}
+
+function renderStamps(n, animateFrom) {
+  $('stamps').innerHTML = Array.from({ length: TOTAL }, (_, i) =>
+    i < n ? `<span class="stamp on${animateFrom !== undefined && i >= animateFrom ? ' pop' : ''}">${check}</span>` : `<span class="stamp">${i + 1}</span>`).join('');
+  setTimeout(() => document.querySelectorAll('.stamp.pop').forEach((s) => s.classList.remove('pop')), 350);
+  $('progress').style.width = `${Math.min(100, (n / TOTAL) * 100)}%`;
+  $('cardCount').textContent = `${n} von ${TOTAL} Stempeln`;
+  const rw = $('cardReward');
+  rw.className = n >= TOTAL ? 'reward-due' : 'foot';
+  rw.style.fontSize = '15px';
+  rw.textContent = n >= TOTAL ? `Prämie fällig: ${C.reward}` : `Noch ${TOTAL - n} bis: ${C.reward}`;
+}
+
+function renderMini(n) {
+  $('miniCard').hidden = false;
+  $('miniCount').textContent = `${n} von ${TOTAL}`;
+  $('miniDots').innerHTML = Array.from({ length: TOTAL }, (_, i) => `<i${i < n ? ' class="on"' : ''}></i>`).join('');
+}
+
+function renderQr() {
+  if (qrFor === cardId) return;
+  $('qrWrap').hidden = false;
+  $('cardCode').textContent = cardId;
+  const url = `${location.origin}${location.pathname}?id=${cardId}`;
+  if (typeof qrcode !== 'undefined') {
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    $('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0 });
+  } else {
+    $('qr').innerHTML = '';
+  }
+  qrFor = cardId;
+}
+
+function button(label, cls, onClick) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = `btn small ${cls}`;
+  b.textContent = label;
+  b.onclick = onClick;
+  return b;
+}
+
+function showSample() {
+  $('cardChip').textContent = 'Beispiel';
+  $('cardChip').className = 'chip';
+  $('cardLead').textContent = 'Am Empfang zeigen wir Ihnen einen QR-Code. Einmal scannen, dann liegt Ihre Karte hier in der App.';
+  $('connectBox').hidden = false;
+  $('qrWrap').hidden = true;
+  $('miniCard').hidden = true;
+  qrFor = null;
+  renderStamps(7);
+  const acts = $('cardActions');
+  acts.innerHTML = '';
+  if (DEMO) acts.append(button('Demo-Karte anlegen', '', () => {
+    cardId = 'DEMO' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    store.set('feinschnitt-stempel-id', cardId);
+    store.set('feinschnitt-demo-stamps', '0');
+    keepIdInUrl();
+    loadCard();
+  }));
+}
+
+function showCard(n) {
+  const prev = lastStamps;
+  lastStamps = n;
+  $('cardChip').textContent = DEMO ? 'Demo' : 'Ihre Karte';
+  $('cardChip').className = 'chip live';
+  $('cardLead').textContent = n >= TOTAL
+    ? `Ihre Karte ist voll. Zeigen Sie den Code am Empfang und Sie bekommen ${C.reward}.`
+    : 'Zeigen Sie den Code bei jedem Besuch am Empfang. Wir stempeln, und der Stand erscheint hier automatisch.';
+  $('connectBox').hidden = true;
+  renderStamps(n, prev !== null && n > prev ? prev : undefined);
+  renderMini(n);
+  renderQr();
+  const acts = $('cardActions');
+  acts.innerHTML = '';
+  if (DEMO) {
+    // Simuliert, was sonst das Personal in mitarbeiter.html macht
+    if (n < TOTAL) acts.append(button('+1 Stempel (Demo)', '', () => setDemo(n + 1)));
+    else acts.append(button('Prämie einlösen (Demo)', '', () => setDemo(0)));
+    acts.append(button('Demo beenden', 'plain', () => {
+      store.del('feinschnitt-stempel-id');
+      store.del('feinschnitt-demo-stamps');
+      cardId = null;
+      lastStamps = null;
+      try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+      showSample();
+    }));
+  }
+}
+
+function setDemo(n) {
+  store.set('feinschnitt-demo-stamps', String(n));
+  showCard(n);
+}
+
+async function loadCard() {
+  $('cardMsg').textContent = '';
+  if (!cardId) return showSample();
+  keepIdInUrl();
+  if (DEMO) return showCard(Number(store.get('feinschnitt-demo-stamps') || 0));
+  try {
+    const r = await fetch(`${C.apiUrl}?action=card&id=${encodeURIComponent(cardId)}`);
+    const d = await r.json();
+    if (!d.ok) {
+      $('cardMsg').textContent = d.error === 'Karte nicht gefunden'
+        ? 'Diese Karte kennen wir nicht. Bitte prüfen Sie den Code oder fragen Sie am Empfang.'
+        : d.error;
+      return;
+    }
+    store.set('feinschnitt-stempel-last', String(d.stamps));
+    showCard(d.stamps);
+  } catch (e) {
+    const last = store.get('feinschnitt-stempel-last');
+    if (last !== null) showCard(Number(last));
+    $('cardMsg').textContent = 'Keine Verbindung. Angezeigt wird der zuletzt bekannte Stand.';
+  }
+}
+
+$('connectForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const code = $('cardCodeInput').value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{6,12}$/.test(code)) {
+    $('cardMsg').textContent = 'Der Code hat 6 bis 12 Zeichen, nur Buchstaben und Ziffern. Sie finden ihn unter dem QR-Code.';
+    return;
+  }
+  cardId = code;
+  store.set('feinschnitt-stempel-id', code);
+  loadCard();
+});
+
+loadCard();
+if (!DEMO) setInterval(() => { if (cardId && !document.hidden) loadCard(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && cardId && !DEMO) loadCard(); });
+
+// ---------- App-Modus & Installation ----------
+const isApp = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+document.documentElement.classList.toggle('is-app', isApp);
+let installEvent = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installEvent = e;
+  $('installBtn').hidden = false;
+});
+$('installBtn').addEventListener('click', async () => {
+  if (!installEvent) return;
+  installEvent.prompt();
+  await installEvent.userChoice;
+  installEvent = null;
+  $('installBtn').hidden = true;
+});
+
+// ---------- Tab-Leiste: aktiven Bereich markieren ----------
+(function tabs() {
+  const links = [...document.querySelectorAll('#tabbar a')];
+  const set = (id) => links.forEach((a) => a.setAttribute('aria-current', a.dataset.tab === id));
+  set('start');
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) set(en.target.id); });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  links.forEach((a) => { const s = $(a.dataset.tab); if (s) io.observe(s); });
+})();
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+renderServices('alle');
+renderCart();
+</script>
+</body>
+</html>

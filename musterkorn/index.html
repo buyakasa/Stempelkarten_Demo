@@ -56,6 +56,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; scroll-padding-top: 64px; }
 body {
   background: var(--bg);
@@ -229,7 +230,7 @@ h1, h2, h3 { margin: 0; text-wrap: balance; }
 .add.done { background: var(--tint); color: var(--on-tint); }
 
 /* Backnacht – echte zeitliche Abfolge */
-.night { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); margin-top: 40px; }
+.night { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); margin-top: 40px; }
 .step { padding: 22px 22px 22px 0; border-top: 1px solid var(--separator); display: grid; gap: 6px; align-content: start; }
 .step time { font-family: var(--font-round); font-size: 34px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--tint); }
 .step h3 { font-size: 17px; font-weight: 600; }
