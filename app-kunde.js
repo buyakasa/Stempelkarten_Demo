@@ -1,4 +1,3 @@
-(function setDynamicManifest() { try { const link = document.querySelector('link[rel="manifest"]'); if (!link) return; const manifest = { name: 'Stempelkarte', short_name: 'Stempel', start_url: location.href, scope: new URL('./', location.href).href, display: 'standalone', background_color: '#F5E6CC', theme_color: '#8B5A2B', icons: [ { src: new URL('icon-192.png', location.href).href, sizes: '192x192', type: 'image/png' }, { src: new URL('icon-512.png', location.href).href, sizes: '512x512', type: 'image/png' } ] }; link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' })); } catch (e) {} })();
 const C = window.STEMPEL_CONFIG;
 const $ = (id) => document.getElementById(id);
 
@@ -7,24 +6,62 @@ $('sub').textContent = C.subtitle;
 $('demo').textContent = C.demoNotice || '';
 document.title = `${C.name} – Stempelkarte`;
 
-// Karten-ID aus Link übernehmen und merken (wichtig, falls das Handy die App
-// später ohne ?id= startet)
+// Kartennummer: kommt aus dem Link (?id=...) oder aus dem Speicher der App.
+// Die Home-Bildschirm-App hat einen eigenen Speicher; dort wird die Nummer
+// beim ersten Eingeben gemerkt.
+const KEY = 'stempel-id';
 const params = new URLSearchParams(location.search);
-let id = params.get('id');
-if (id) {
-  localStorage.setItem('stempel-id', id);
-} else {
-  id = localStorage.getItem('stempel-id');
-}
+let id = (params.get('id') || '').toUpperCase().trim();
+try {
+  if (id) {
+    localStorage.setItem(KEY, id);
+  } else {
+    id = (localStorage.getItem(KEY) || '').trim();
+  }
+} catch (e) { /* Speicher nicht verfügbar: Nummer muss jedes Mal eingegeben werden */ }
 
 let qrRendered = false;
+let timer = null;
+
+function showIdForm() {
+  $('msg').textContent = 'Bitte deine Kartennummer eingeben. Du findest sie beim Personal auf der Karte.';
+  $('idForm').classList.remove('hidden');
+  $('idInput').focus();
+}
+
+function saveAndStart() {
+  const v = $('idInput').value.toUpperCase().trim();
+  if (!/^[A-Z0-9]{6,12}$/.test(v)) {
+    $('msg').textContent = 'Bitte eine gültige Kartennummer eingeben (Buchstaben und Zahlen).';
+    return;
+  }
+  try { localStorage.setItem(KEY, v); } catch (e) { /* ignorieren */ }
+  id = v;
+  $('idForm').classList.add('hidden');
+  start();
+}
+
+function forgetCard() {
+  try { localStorage.removeItem(KEY); } catch (e) { /* ignorieren */ }
+  location.href = location.pathname;
+}
+
+function start() {
+  $('msg').textContent = '';
+  load();
+  if (timer) clearInterval(timer);
+  timer = setInterval(load, 60000);
+}
 
 async function load() {
   try {
     const r = await fetch(`${C.apiUrl}?action=card&id=${encodeURIComponent(id)}`);
     const d = await r.json();
     if (!d.ok) {
-      $('msg').textContent = d.error;
+      $('card').classList.add('hidden');
+      $('qrBox').classList.add('hidden');
+      $('msg').textContent = d.error + ' – bitte Kartennummer prüfen.';
+      $('forget').classList.remove('hidden');
       return;
     }
     $('msg').textContent = '';
@@ -37,6 +74,8 @@ async function load() {
 function render(n) {
   $('card').classList.remove('hidden');
   $('qrBox').classList.remove('hidden');
+  $('forget').classList.remove('hidden');
+  $('cardno').textContent = `Kartennummer: ${id}`;
 
   const grid = $('stamps');
   grid.innerHTML = '';
@@ -61,9 +100,12 @@ function render(n) {
   }
 }
 
-if (!id) {
-  $('msg').textContent = 'Diese Karte ist noch nicht geöffnet. Bitte den Link oder QR-Code vom Personal in Safari öffnen und erst dann zum Home-Bildschirm hinzufügen.';
+$('idBtn').onclick = saveAndStart;
+$('idInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveAndStart(); });
+$('forget').onclick = forgetCard;
+
+if (id) {
+  start();
 } else {
-  load();
-  setInterval(load, 60000);
+  showIdForm();
 }

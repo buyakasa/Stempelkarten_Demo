@@ -166,6 +166,7 @@ $('newBtn').onclick = async () => {
   qr.addData(link);
   qr.make();
   $('newQr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2 });
-  $('newLink').textContent = link;
+  $('newLink').textContent = `Kartennummer: ${d.id}`;
+  $('newPanel').dataset.link = link;
   $('newPanel').classList.remove('hidden');
 };
