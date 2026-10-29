@@ -61,7 +61,7 @@ function render(n) {
 }
 
 if (!id) {
-  $('msg').textContent = 'Bitte den Link oder QR-Code vom Personal öffnen.';
+  $('msg').textContent = 'Diese Karte ist noch nicht geöffnet. Bitte den Link oder QR-Code vom Personal in Safari öffnen und erst dann zum Home-Bildschirm hinzufügen.';
 } else {
   load();
   setInterval(load, 60000);
