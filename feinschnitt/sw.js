@@ -1,4 +1,4 @@
-const CACHE = 'feinschnitt-v1';
+const CACHE = 'feinschnitt-v2';
 const SHELL = [
   'index.html',
   'mitarbeiter.html',
