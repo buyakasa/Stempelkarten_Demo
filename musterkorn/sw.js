@@ -1,4 +1,4 @@
-const CACHE = 'musterkorn-v3';
+const CACHE = 'musterkorn-v4';
 const SHELL = [
   'index.html',
   'mitarbeiter.html',
