@@ -264,7 +264,16 @@ h1, h2, h3 { margin: 0; text-wrap: balance; }
 .card-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
 .card-count strong { font-variant-numeric: tabular-nums; }
 .reward-due { color: var(--tint); font-weight: 600; }
-.qr { display: grid; justify-items: center; gap: 8px; padding-top: 18px; border-top: .5px solid var(--separator); }
+.qr-fold { border-top: .5px solid var(--separator); padding-top: 14px; }
+.qr-fold summary {
+  list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 44px; font-size: 15px; font-weight: 600; color: var(--tint); -webkit-tap-highlight-color: transparent;
+}
+.qr-fold summary::-webkit-details-marker { display: none; }
+.qr-fold summary svg { width: 18px; height: 18px; flex: none; transition: transform .25s ease; }
+.qr-fold[open] summary svg { transform: rotate(180deg); }
+.qr-none { margin: 4px 0 0; font-size: 15px; }
+.qr { display: grid; justify-items: center; gap: 8px; padding-top: 10px; }
 .qr-box { background: var(--qr-bg); padding: 10px; border-radius: var(--r-md); line-height: 0; }
 .qr-box svg { width: 196px; height: 196px; max-width: 100%; }
 .code { font: 600 15px var(--font-round); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
@@ -450,11 +459,16 @@ footer .wrap { display: grid; gap: 10px; }
           <strong id="cardCount">7 von 10 Stempeln</strong>
           <span class="foot" style="font-size:15px" id="cardReward">Noch 3 bis zur Pflege-Kur</span>
         </div>
-        <div class="qr" id="qrWrap" hidden>
-          <span class="foot">Am Empfang vorzeigen</span>
-          <div class="qr-box" id="qr"></div>
-          <span class="code" id="cardCode"></span>
-        </div>
+        <details class="qr-fold" id="qrFold">
+          <summary><span id="qrFoldLabel">QR-Code und Karten-ID anzeigen</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="qr" id="qrWrap" hidden>
+            <span class="foot">Am Empfang vorzeigen oder die Karten-ID nennen</span>
+            <div class="qr-box" id="qr"></div>
+            <span class="foot">Karten-ID</span>
+            <span class="code" id="cardCode"></span>
+          </div>
+          <p class="foot qr-none" id="qrNone">Sie haben noch keine Karte. Beim ersten Besuch legen wir sie am Empfang an, danach stehen hier Ihr QR-Code und Ihre Karten-ID.</p>
+        </details>
       </div>
     </div>
   </section>
@@ -829,8 +843,9 @@ function renderMini(n) {
 }
 
 function renderQr() {
-  if (qrFor === cardId) return;
   $('qrWrap').hidden = false;
+  $('qrNone').hidden = true;
+  if (qrFor === cardId) return;
   $('cardCode').textContent = cardId;
   const url = `${location.origin}${location.pathname}?id=${cardId}`;
   if (typeof qrcode !== 'undefined') {
@@ -859,6 +874,7 @@ function showSample() {
   $('cardLead').textContent = 'Am Empfang zeigen wir Ihnen einen QR-Code. Einmal scannen, dann liegt Ihre Karte hier in der App.';
   $('connectBox').hidden = false;
   $('qrWrap').hidden = true;
+  $('qrNone').hidden = false;
   $('miniCard').hidden = true;
   qrFor = null;
   renderStamps(7);
@@ -879,8 +895,8 @@ function showCard(n) {
   $('cardChip').textContent = DEMO ? 'Demo' : 'Ihre Karte';
   $('cardChip').className = 'chip live';
   $('cardLead').textContent = n >= TOTAL
-    ? `Ihre Karte ist voll. Zeigen Sie den Code am Empfang und Sie bekommen ${C.reward}.`
-    : 'Zeigen Sie den Code bei jedem Besuch am Empfang. Wir stempeln, und der Stand erscheint hier automatisch.';
+    ? `Ihre Karte ist voll. Zeigen Sie Ihren QR-Code am Empfang oder nennen Sie Ihre Karten-ID, dann bekommen Sie ${C.reward}.`
+    : 'Zeigen Sie bei jedem Besuch Ihren QR-Code am Empfang oder nennen Sie Ihre Karten-ID. Wir stempeln, und der Stand erscheint hier automatisch.';
   $('connectBox').hidden = true;
   renderStamps(n, prev !== null && n > prev ? prev : undefined);
   renderMini(n);
@@ -934,12 +950,16 @@ $('connectForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const code = $('cardCodeInput').value.trim().toUpperCase();
   if (!/^[A-Z0-9]{6,12}$/.test(code)) {
-    $('cardMsg').textContent = 'Der Code hat 6 bis 12 Zeichen, nur Buchstaben und Ziffern. Sie finden ihn unter dem QR-Code.';
+    $('cardMsg').textContent = 'Der Code hat 6 bis 12 Zeichen, nur Buchstaben und Ziffern. Sie finden ihn auf der Karte unter „QR-Code und Karten-ID anzeigen“.';
     return;
   }
   cardId = code;
   store.set('feinschnitt-stempel-id', code);
   loadCard();
+});
+
+$('qrFold').addEventListener('toggle', () => {
+  $('qrFoldLabel').textContent = $('qrFold').open ? 'QR-Code und Karten-ID ausblenden' : 'QR-Code und Karten-ID anzeigen';
 });
 
 loadCard();
